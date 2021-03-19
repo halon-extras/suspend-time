@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Suspend schema",
+  "additionalProperties": false,
+  "properties": {
+    "suspends": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "The suspend rules",
+      "items": {
+        "type": "object",
+        "oneOf": [
+          {
+            "required": [
+              "if"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "transportid": {
+                "type": "string"
+              },
+              "localip": {
+                "type": "string"
+              },
+              "remoteip": {
+                "type": "string"
+              },
+              "remotemx": {
+                "type": "string"
+              },
+              "recipientdomain": {
+                "type": "string"
+              },
+              "jobid": {
+                "type": "string"
+              },
+              "tag": {
+                "type": "string"
+              },
+              "if": {
+                "type": "array",
+                "description": "The data",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^((((\\d+-)?\\d+|\\*)(\\/\\d)?,)*(((\\d+-)?\\d+|\\*)(\\/\\d)?)(\\s|$)){5}"
+                }
+              }
+            }
+          },
+          {
+            "required": [
+              "ifnot"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "transportid": {
+                "type": "string"
+              },
+              "localip": {
+                "type": "string"
+              },
+              "remoteip": {
+                "type": "string"
+              },
+              "remotemx": {
+                "type": "string"
+              },
+              "recipientdomain": {
+                "type": "string"
+              },
+              "jobid": {
+                "type": "string"
+              },
+              "tag": {
+                "type": "string"
+              },
+              "ifnot": {
+                "type": "array",
+                "description": "The data",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^((((\\d+-)?\\d+|\\*)(\\/\\d)?,)*(((\\d+-)?\\d+|\\*)(\\/\\d)?)(\\s|$)){5}"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
