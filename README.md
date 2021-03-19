@@ -8,7 +8,7 @@ Only deliver mail on working hours on weekdays
 
 ```
 suspends:
- - tag: workhours
+ - tag: nonworkhours
    ifnot:
     - "* 8-17 * * 1-5"
 ```
