@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <mutex>
+#include <memory>
 
 struct config
 {
