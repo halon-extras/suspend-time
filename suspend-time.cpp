@@ -17,6 +17,7 @@ struct config
 	std::shared_ptr<std::string> remotemx;
 	std::shared_ptr<std::string> recipientdomain;
 	std::shared_ptr<std::string> jobid;
+	std::shared_ptr<std::string> grouping;
 	std::shared_ptr<std::string> tag;
 	std::shared_ptr<std::string> id;
 	std::list<std::string> _if;
@@ -71,17 +72,18 @@ void check_suspend()
 		{
 			if (!c.id)
 			{
-				char* id = HalonMTA_queue_suspend_add(
+				char* id = HalonMTA_queue_suspend_add2(
 					c.transportid.get() ? c.transportid.get()->c_str() : nullptr,
 					c.localip.get() ? c.localip.get()->c_str() : nullptr,
 					c.remoteip.get() ? c.remoteip.get()->c_str() : nullptr,
 					c.remotemx.get() ? c.remotemx.get()->c_str() : nullptr,
 					c.recipientdomain.get() ? c.recipientdomain.get()->c_str() : nullptr,
 					c.jobid.get() ? c.jobid.get()->c_str() : nullptr,
+					c.grouping.get() ? c.grouping.get()->c_str() : nullptr,
 					c.tag.get() ? c.tag.get()->c_str() : nullptr, 0);
 				c.id.reset(new std::string(id));
 				free(id);
-				syslog(LOG_INFO, "suspendtime: %s added (transportid=%s, localip=%s, remoteip=%s, remotemx=%s, recipientdomain=%s, jobid=%s tag=%s)",
+				syslog(LOG_INFO, "suspendtime: %s added (transportid=%s, localip=%s, remoteip=%s, remotemx=%s, recipientdomain=%s, jobid=%s, grouping=%s, tag=%s)",
 					c.id.get()->c_str(),
 					c.transportid ? c.transportid.get()->c_str() : "",
 					c.localip ? c.localip.get()->c_str() : "",
@@ -89,6 +91,7 @@ void check_suspend()
 					c.remotemx ? c.remotemx.get()->c_str() : "",
 					c.recipientdomain ? c.recipientdomain.get()->c_str() : "",
 					c.jobid ? c.jobid.get()->c_str() : "",
+					c.grouping ? c.grouping.get()->c_str() : "",
 					c.tag ? c.tag.get()->c_str() : "");
 			}
 		}
@@ -147,7 +150,7 @@ void Halon_config_reload(HalonConfig* hc)
 		for (auto & c2 : config2)
 		{
 #define CMP(k) ((c.k && c2.k && *c.k.get() == *c2.k.get()) || (!c.k && !c2.k))
-			if (CMP(transportid) && CMP(localip) && CMP(remoteip) && CMP(remotemx) && CMP(recipientdomain) && CMP(jobid) && CMP(tag))
+			if (CMP(transportid) && CMP(localip) && CMP(remoteip) && CMP(remotemx) && CMP(recipientdomain) && CMP(jobid) && CMP(grouping) && CMP(tag))
 			{
 				c2.id = c.id;
 				found = true;
@@ -193,6 +196,7 @@ bool parseConfig(HalonConfig* cfg, std::list<struct config>& config)
 		const char* remotemx = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "remotemx"), nullptr);
 		const char* recipientdomain = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "recipientdomain"), nullptr);
 		const char* jobid = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "jobid"), nullptr);
+		const char* grouping = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "grouping"), nullptr);
 		const char* tag = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "tag"), nullptr);
 
 		struct config m;
@@ -202,6 +206,7 @@ bool parseConfig(HalonConfig* cfg, std::list<struct config>& config)
 		if (remotemx) m.remotemx = std::make_shared<std::string>(remotemx);
 		if (recipientdomain) m.recipientdomain = std::make_shared<std::string>(recipientdomain);
 		if (jobid) m.jobid = std::make_shared<std::string>(jobid);
+		if (grouping) m.grouping = std::make_shared<std::string>(grouping);
 		if (tag) m.tag = std::make_shared<std::string>(tag);
 
 		auto ifs = HalonMTA_config_object_get(suspend, "if");

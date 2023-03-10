@@ -35,6 +35,9 @@
               "jobid": {
                 "type": "string"
               },
+              "grouping": {
+                "type": "string"
+              },
               "tag": {
                 "type": "string"
               },
@@ -71,6 +74,9 @@
                 "type": "string"
               },
               "jobid": {
+                "type": "string"
+              },
+              "grouping": {
                 "type": "string"
               },
               "tag": {
