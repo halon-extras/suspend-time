@@ -119,6 +119,7 @@ bool Halon_init(HalonInitContext* hic)
 	std::lock_guard<std::mutex> lk(configlock);
 	check_suspend();
 	p = std::thread([] {
+		pthread_setname_np(pthread_self(), "p/suspend/time");
 		while (true)
 		{
 			for (size_t i = 0; i < 5 && !stop; ++i)
