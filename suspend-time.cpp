@@ -8,6 +8,7 @@
 #include <syslog.h>
 #include <mutex>
 #include <memory>
+#include <stdexcept>
 
 struct config
 {
