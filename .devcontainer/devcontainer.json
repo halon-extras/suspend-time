@@ -1,0 +1,15 @@
+{
+	"name": "suspend-time",
+	"dockerComposeFile": [
+		"docker-compose.yaml"
+	],
+	"workspaceFolder": "/suspend-time",
+	"service": "halon-smtpd",
+	"overrideCommand": false,
+	"extensions": [
+		"Halon.vscode-halon",
+		"Halon.hsl-linter",
+		"Halon.hsl-debug",
+		"ms-vscode.cpptools"
+	]
+}
