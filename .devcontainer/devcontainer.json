@@ -11,5 +11,8 @@
 		"Halon.hsl-linter",
 		"Halon.hsl-debug",
 		"ms-vscode.cpptools"
+	],
+	"mounts": [
+		"source=${localWorkspaceFolder}/.devcontainer/smtpd/dist,target=/etc/halon,type=bind,consistency=cached"
 	]
 }
