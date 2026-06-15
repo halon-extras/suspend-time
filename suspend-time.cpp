@@ -31,7 +31,7 @@ bool stop = false;
 std::thread p;
 
 bool isCronNow(const std::string& input, time_t now);
-bool parseConfig(HalonConfig* cfg, std::list<struct config>& config);
+bool parseConfig(HalonConfig* cfg, std::list<struct config>& config_);
 
 HALON_EXPORT
 int Halon_version()
@@ -127,7 +127,7 @@ bool Halon_init(HalonInitContext* hic)
 				sleep(1);
 			if (stop)
 				break;
-			std::lock_guard<std::mutex> lk(configlock);
+			std::lock_guard<std::mutex> lk_(configlock);
 			check_suspend();
 		}
 	});
@@ -182,7 +182,7 @@ void Halon_cleanup()
 	p.join();
 }
 
-bool parseConfig(HalonConfig* cfg, std::list<struct config>& config)
+bool parseConfig(HalonConfig* cfg, std::list<struct config>& config_)
 {
 	auto suspends = HalonMTA_config_object_get(cfg, "suspends");
 	if (!suspends)
@@ -238,7 +238,7 @@ bool parseConfig(HalonConfig* cfg, std::list<struct config>& config)
 			}
 		}
 
-		config.push_back(m);
+		config_.push_back(m);
 	}
 	return true;
 }
@@ -264,8 +264,8 @@ std::vector<std::string> split(const std::string& str, const std::string& separa
 
 bool isCronNow(const std::string& input, time_t now)
 {
-	auto s = split(input, " ");
-	if (s.size() != 5)
+	auto inputfields = split(input, " ");
+	if (inputfields.size() != 5)
 		throw std::runtime_error("Cron consists of more than 5 fields");
 
 	struct tm buf;
@@ -289,7 +289,7 @@ bool isCronNow(const std::string& input, time_t now)
 	for (size_t i = 0; i < 5; ++i)
 	{
 		bool o = false;
-		for (const auto & v : split(s[i], ","))
+		for (const auto & v : split(inputfields[i], ","))
 		{
 			size_t step = 0;
 			auto s = split(v, "/");
@@ -336,19 +336,19 @@ bool isCronNow(const std::string& input, time_t now)
 				case 2:
 				{
 					char* end;
-					auto s = strtoul(r[0].c_str(), &end, 10);
+					auto b = strtoul(r[0].c_str(), &end, 10);
 					if (end != r[0].c_str() + r[0].size())
 						throw std::runtime_error(r[0] + " is invalid number");
 					auto e = strtoul(r[1].c_str(), &end, 10);
 					if (end != r[1].c_str() + r[1].size())
 						throw std::runtime_error(r[1] + " is invalid number");
-					if (s > e)
+					if (b > e)
 						throw std::runtime_error("invalid range");
-					if (s < fields[i].min)
+					if (b < fields[i].min)
 						throw std::runtime_error("invalid range too small");
 					if (e > fields[i].max)
 						throw std::runtime_error("invalid range too range");
-					if (fields[i].cur >= s && fields[i].cur <= e && (!step || fields[i].cur % step == 0))
+					if (fields[i].cur >= b && fields[i].cur <= e && (!step || fields[i].cur % step == 0))
 						o = true;
 				}
 				break;
