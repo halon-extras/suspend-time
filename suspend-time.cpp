@@ -9,6 +9,9 @@
 #include <mutex>
 #include <memory>
 #include <stdexcept>
+#if __cplusplus >= 202002L
+#include <chrono>
+#endif
 
 struct config
 {
@@ -23,6 +26,7 @@ struct config
 	std::shared_ptr<std::string> id;
 	std::list<std::string> _if;
 	std::list<std::string> _ifnot;
+	std::string tz;
 };
 
 std::mutex configlock;
@@ -30,7 +34,7 @@ std::list<struct config> config;
 bool stop = false;
 std::thread p;
 
-bool isCronNow(const std::string& input, time_t now);
+bool isCronNow(const std::string& input, const std::string& tz, time_t now);
 bool parseConfig(HalonConfig* cfg, std::list<struct config>& config_);
 
 HALON_EXPORT
@@ -50,7 +54,7 @@ void check_suspend()
 			match = false;
 			for (const auto & i : c._if)
 			{
-				if (isCronNow(i.c_str(), n))
+				if (isCronNow(i.c_str(), c.tz, n))
 				{
 					match = true;
 					break;
@@ -62,7 +66,7 @@ void check_suspend()
 			match = true;
 			for (const auto & i : c._ifnot)
 			{
-				if (isCronNow(i.c_str(), n))
+				if (isCronNow(i.c_str(), c.tz, n))
 				{
 					match = false;
 					break;
@@ -200,6 +204,7 @@ bool parseConfig(HalonConfig* cfg, std::list<struct config>& config_)
 		const char* jobid = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "jobid"), nullptr);
 		const char* grouping = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "grouping"), nullptr);
 		const char* tag = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "tag"), nullptr);
+		const char* tz = HalonMTA_config_string_get(HalonMTA_config_object_get(suspend, "timezone"), nullptr);
 
 		struct config m;
 		if (transportid) m.transportid = std::make_shared<std::string>(transportid);
@@ -210,6 +215,7 @@ bool parseConfig(HalonConfig* cfg, std::list<struct config>& config_)
 		if (jobid) m.jobid = std::make_shared<std::string>(jobid);
 		if (grouping) m.grouping = std::make_shared<std::string>(grouping);
 		if (tag) m.tag = std::make_shared<std::string>(tag);
+		if (tz) m.tz = std::string(tz);
 
 		auto ifs = HalonMTA_config_object_get(suspend, "if");
 		if (ifs)
@@ -262,15 +268,42 @@ std::vector<std::string> split(const std::string& str, const std::string& separa
 	return result;
 }
 
-bool isCronNow(const std::string& input, time_t now)
+bool isCronNow(const std::string& input, const std::string& tz, time_t now)
 {
 	auto inputfields = split(input, " ");
 	if (inputfields.size() != 5)
 		throw std::runtime_error("Cron consists of more than 5 fields");
 
 	struct tm buf;
-	if (!localtime_r(&now, &buf))
-		throw std::runtime_error("localtime_r failed");
+	if (!tz.empty())
+	{
+#if __cplusplus >= 202002L
+		auto now_ = std::chrono::system_clock::from_time_t(now);
+		auto zt = std::chrono::zoned_seconds(tz, std::chrono::floor<std::chrono::seconds>(now_));
+		auto lt = zt.get_local_time();
+
+		auto d = std::chrono::floor<std::chrono::days>(lt);
+		std::chrono::year_month_day ymd{d};
+		std::chrono::hh_mm_ss hms{lt - d};
+		buf.tm_year = int(ymd.year()) - 1900;
+		buf.tm_mon  = unsigned(ymd.month()) - 1;
+		buf.tm_mday = unsigned(ymd.day());
+		buf.tm_hour = int(hms.hours().count());
+		buf.tm_min  = int(hms.minutes().count());
+		buf.tm_sec  = int(hms.seconds().count());
+		buf.tm_wday = std::chrono::weekday{d}.c_encoding();
+		auto jan1 = std::chrono::local_days{ymd.year() / std::chrono::January / 1};
+		buf.tm_yday = int((d - jan1).count());
+		buf.tm_isdst = -1;
+#else
+		throw std::runtime_error("Timezone support is not available on this platform");
+#endif
+	}
+	else
+	{
+		if (!localtime_r(&now, &buf))
+			throw std::runtime_error("localtime_r failed");
+	}
 
 	struct field
 	{

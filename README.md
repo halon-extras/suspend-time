@@ -30,6 +30,7 @@ plugins:
     config:
       suspends:
         - tag: nonworkhours
+          timezone: Asia/Tokyo # only supported on Ubuntu 24.04 / RHEL10 or later
           ifnot:
             - "* 8-17 * * 1-5"
 ```

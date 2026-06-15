@@ -46,3 +46,11 @@ scripting:
               $mail->queue($sender, $recipient["address"], $recipient["transportid"]);
 
           Accept();
+plugins:
+  - id: suspend-time
+    config:
+      suspends:
+      - tag: nonworkhours
+        timezone: Asia/Tokyo
+        ifnot:
+          - "* 8-17 * * 1-5"

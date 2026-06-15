@@ -26,3 +26,11 @@ transportgroups:
 resolver:
   cache:
     size: 10000
+plugins:
+  - id: suspend-time
+    config:
+      suspends:
+      - tag: nonworkhours
+        timezone: Asia/Tokyo
+        ifnot:
+          - "* 8-17 * * 1-5"

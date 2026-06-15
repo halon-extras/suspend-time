@@ -41,6 +41,9 @@
               "tag": {
                 "type": "string"
               },
+              "timezone": {
+                "type": "string"
+              },
               "if": {
                 "type": "array",
                 "description": "The data",
