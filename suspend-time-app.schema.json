@@ -38,6 +38,9 @@
               "grouping": {
                 "type": "string"
               },
+              "tenantid": {
+                "type": "string"
+              },
               "tag": {
                 "type": "string"
               },
@@ -80,6 +83,9 @@
                 "type": "string"
               },
               "grouping": {
+                "type": "string"
+              },
+              "tenantid": {
                 "type": "string"
               },
               "tag": {
