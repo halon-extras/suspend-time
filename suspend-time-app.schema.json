@@ -85,6 +85,9 @@
               "tag": {
                 "type": "string"
               },
+              "timezone": {
+                "type": "string"
+              },
               "ifnot": {
                 "type": "array",
                 "description": "The data",
