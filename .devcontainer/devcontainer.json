@@ -6,12 +6,17 @@
 	"workspaceFolder": "/suspend-time",
 	"service": "halon-smtpd",
 	"overrideCommand": false,
-	"extensions": [
-		"Halon.vscode-halon",
-		"Halon.hsl-linter",
-		"Halon.hsl-debug",
-		"ms-vscode.cpptools"
-	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"halon.vscode-halon",
+				"halon.hsl-syntax",
+				"halon.hsl-linter",
+				"halon.hsl-debug",
+				"ms-vscode.cpptools-extension-pack"
+			]
+		}
+	},
 	"mounts": [
 		"source=${localWorkspaceFolder}/.devcontainer/smtpd/dist,target=/etc/halon,type=bind,consistency=cached"
 	]
